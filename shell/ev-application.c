@@ -22,6 +22,7 @@
  */
 
 #include <config.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,6 +37,7 @@
 #include "ev-application.h"
 #include "ev-file-helpers.h"
 #include "ev-stock-icons.h"
+#include "ev-window.h"
 
 #ifdef ENABLE_DBUS
 #include "ev-gdbus-generated.h"
@@ -687,10 +689,11 @@ ev_application_open_uri_at_dest (EvApplication  *application,
  *
  * Creates a new window
  */
-void
+
+EvWindow*
 ev_application_open_window (EvApplication *application,
-			    GdkScreen     *screen,
-			    guint32        timestamp)
+							GdkScreen     *screen,
+							guint32        timestamp)
 {
 	GtkWidget *new_window = ev_window_new ();
 	GdkWindow *gdk_window;
@@ -712,6 +715,7 @@ ev_application_open_window (EvApplication *application,
 	}
 
 	gtk_window_present (GTK_WINDOW (new_window));
+	return EV_WINDOW(new_window);
 }
 
 #ifdef ENABLE_DBUS

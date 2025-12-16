@@ -199,6 +199,7 @@ struct _EvWindowPrivate {
 	/* Document */
 	EvDocumentModel *model;
 	char *uri;
+	char *last_uri;
 	gint64 uri_mtime;
 	char *local_uri;
 	gboolean in_reload;
@@ -2369,11 +2370,20 @@ ev_window_load_file_remote (EvWindow *ev_window,
 }
 
 void
+ev_window_open_last_uri(EvWindow       *ev_window,
+						EvLinkDest     *dest,
+						EvWindowRunMode mode,
+						const gchar    *search_string) 
+{
+	ev_window_open_uri(ev_window, ev_window->priv->last_uri, dest, mode, search_string);
+}
+
+void
 ev_window_open_uri (EvWindow       *ev_window,
-		    const char     *uri,
-		    EvLinkDest     *dest,
-		    EvWindowRunMode mode,
-		    const gchar    *search_string)
+					const char     *uri,
+					EvLinkDest     *dest,
+					EvWindowRunMode mode,
+					const gchar    *search_string)
 {
 	GFile *source_file;
 
@@ -2987,9 +2997,9 @@ ev_window_setup_recent (EvWindow *ev_window)
 		GtkAction     *action;
 		gchar         *action_name;
 		gchar         *label;
-                const gchar   *mime_type;
-                gchar         *content_type;
-                GIcon         *icon = NULL;
+		const gchar   *mime_type;
+		gchar         *content_type;
+		GIcon         *icon = NULL;
 
 		info = (GtkRecentInfo *) l->data;
 
@@ -2997,22 +3007,27 @@ ev_window_setup_recent (EvWindow *ev_window)
 		    (gtk_recent_info_is_local (info) && !gtk_recent_info_exists (info)))
 			continue;
 
+		if (i == 0) 
+			ev_window->priv->last_uri = gtk_recent_info_get_uri(info);
+
 		action_name = g_strdup_printf ("RecentFile%u", i++);
 		label = ev_window_get_recent_file_label (
 			n_items + 1, gtk_recent_info_get_display_name (info));
 
-                mime_type = gtk_recent_info_get_mime_type (info);
-                content_type = g_content_type_from_mime_type (mime_type);
-                if (content_type != NULL) {
-                        icon = g_content_type_get_icon (content_type);
-                        g_free (content_type);
-                }
+		mime_type = gtk_recent_info_get_mime_type (info);
+		content_type = g_content_type_from_mime_type (mime_type);
+		
+		if (content_type != NULL) {
+			icon = g_content_type_get_icon (content_type);
+			g_free (content_type);
+		}
+
 		G_GNUC_BEGIN_IGNORE_DEPRECATIONS;
 		action = g_object_new (GTK_TYPE_ACTION,
 				       "name", action_name,
 				       "label", label,
-                                       "gicon", icon,
-                                       "always-show-image", TRUE,
+					   "gicon", icon,
+					   "always-show-image", TRUE,
 				       NULL);
 		G_GNUC_END_IGNORE_DEPRECATIONS;
 

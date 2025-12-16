@@ -158,12 +158,6 @@ load_files (const char **files)
 	gint             i;
 	EvLinkDest      *global_dest = NULL;
 
-	if (!files) {
-		if (!ev_application_has_window (EV_APP))
-			ev_application_open_window (EV_APP, screen, GDK_CURRENT_TIME);
-		return;
-	}
-
 	if (ev_page_label)
 		global_dest = ev_link_dest_new_page_label (ev_page_label);
 	else if (ev_page_index)
@@ -175,6 +169,15 @@ load_files (const char **files)
 		mode = EV_WINDOW_MODE_FULLSCREEN;
 	else if (presentation_mode)
 		mode = EV_WINDOW_MODE_PRESENTATION;
+
+	if (!files) {
+		if (!ev_application_has_window (EV_APP)) {
+			EvWindow *window;
+			window = ev_application_open_window (EV_APP, screen, GDK_CURRENT_TIME);
+			ev_window_open_last_uri(window, global_dest, mode, ev_find_string);
+		}
+		return;
+	}
 
 	for (i = 0; files[i]; i++) {
 		const gchar *filename;
@@ -211,7 +214,7 @@ load_files (const char **files)
 		if (dest)
 			g_object_unref (dest);
 		g_free (uri);
-        }
+    }
 }
 
 int
@@ -254,8 +257,8 @@ main (int argc, char *argv[])
 		return retval ? 0 : 1;
 	}
 
-        if (!ev_init ())
-                return 1;
+	if (!ev_init ())
+		return 1;
 
 	ev_stock_icons_init ();
 
@@ -279,7 +282,7 @@ main (int argc, char *argv[])
 
 	status = g_application_run (G_APPLICATION (application), 0, NULL);
 
-    done:
+done:
 	ev_shutdown ();
 
 	g_object_unref (application);
