@@ -75,6 +75,12 @@ void		ev_window_open_uri	(EvWindow       *ev_window,
 					 EvLinkDest     *dest,
 					 EvWindowRunMode mode,
 					 const gchar    *search_string);
+
+void ev_window_open_last_uri(EvWindow       *ev_window,
+						EvLinkDest     *dest,
+						EvWindowRunMode mode,
+						const gchar    *search_string);
+
 void		ev_window_open_document (EvWindow       *ev_window,
 					 EvDocument     *document,
 					 EvLinkDest     *dest,
